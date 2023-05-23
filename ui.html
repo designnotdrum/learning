@@ -1,0 +1,125 @@
+<!-- <h2>AutoLayout to HTML/CSS</h2>
+<label for="html_output">HTML
+  <textarea name="html_output" id="htmlOutput" cols="30" rows="10"></textarea>
+</label>
+<label for="css_output">CSS
+  <textarea name="css_output" id="cssOutput" cols="30" rows="10"></textarea>
+</label>
+<label for="js_output">JS
+  <textarea name="js_output" id="jsOutput" cols="30" rows="10"></textarea>
+</label>
+<button id="create">Create</button>
+<button id="cancel">Cancel</button>
+
+
+<script>
+
+  document.getElementById('create').onclick = () => {
+    const textbox = document.getElementById('count');
+    const count = parseInt(textbox.value, 10);
+    parent.postMessage({ pluginMessage: { type: 'create-rectangles', count } }, '*')
+  }
+
+  document.getElementById('cancel').onclick = () => {
+    parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
+  }
+
+</script> -->
+
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background: #F5F5F5;
+  }
+
+  button {
+    padding: 8px 16px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    background: #1abc9c;
+    color: white;
+    cursor: pointer;
+  }
+
+  button:disabled {
+    background: #ccc;
+  }
+
+  pre {
+    background: #f0f0f0;
+    padding: 10px;
+    border-radius: 4px;
+    width: 80%;
+    overflow: auto;
+  }
+
+  #selectionName {
+    margin-bottom: 20px;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: start;
+    width: 100vw;
+    padding: 4vh 4vw
+  }
+</style>
+<div class="container">
+  <h1>Selected Node: <span id="selectedNodeName"></span></h1>
+  <button id="convertButton" disabled>Convert to HTML/CSS/JS</button>
+  <div id="conversionResult"></div>
+</div>
+
+
+<script>
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const convertButton = document.getElementById('convertButton');
+    const selectedNodeName = document.getElementById('selectedNodeName');
+    const conversionResult = document.getElementById('conversionResult');
+
+    // Enable the convert button only when a frame or component is selected
+    parent.postMessage({ pluginMessage: { type: 'ENABLE_CONVERT_BUTTON' } }, '*');
+
+    // Handle messages from the plugin
+    window.onmessage = function (event) {
+      const message = event.data.pluginMessage;
+
+      if (message.type === 'UPDATE_SELECTED_NODE_NAME') {
+        selectedNodeName.textContent = message.name;
+      } else if (message.type === 'SHOW_CONVERSION_RESULT') {
+        conversionResult.textContent = message.result;
+      }
+    };
+
+    // Convert button click event handler
+    convertButton.addEventListener('click', function () {
+      parent.postMessage({ pluginMessage: { type: 'CONVERT_SELECTED_NODE' } }, '*');
+    });
+  });
+  // Communication with the plugin code
+  onmessage = (event) => {
+    const { type, message } = event.data.pluginMessage;
+    if (type === 'selectionChanged') {
+      // Update the selection name and enable the button only if a frame or component is selected
+      const selectionName = message ? message : 'No selection';
+      document.getElementById('selectionName').textContent = selectionName;
+      document.getElementById('convertButton').disabled = !message;
+    } else if (type === 'conversionResult') {
+      // Display the generated HTML, CSS, and JavaScript
+      document.getElementById('output').textContent = message;
+    }
+  };
+
+  document.getElementById('convertButton').onclick = () => {
+    parent.postMessage({ pluginMessage: { type: 'convert' } }, '*');
+  };
+</script>
